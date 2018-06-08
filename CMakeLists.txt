@@ -12,7 +12,7 @@ find_package(Boost COMPONENTS system filesystem REQUIRED)
 
 SET(CMAKE_C_COMPILER g++)
 SET(CMAKE_CXX_COMPILER g++)
-set(SOURCE_FILES main.txt main2.txt mainv2.cpp)
+set(SOURCE_FILES main.txt main2.txt mainv2.cpp emd_test.cpp emd_test.hpp)
 add_executable(Valentin ${SOURCE_FILES})
 link_directories(/usr/lib64/)
 

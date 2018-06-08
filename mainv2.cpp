@@ -576,6 +576,8 @@ int main(int argc, char** argv)
 
     }
 
+
+    cout << "sum(sum(mzt)) : " << sum(sum(dsp)) << endl;
     std::cout << std::endl;
 
 }
