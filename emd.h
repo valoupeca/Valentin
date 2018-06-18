@@ -16,8 +16,6 @@
 
 #include "network_simplex_simple.h"
 
-
-typedef unsigned int node_id_type;
 using namespace lemon;
 
 typedef unsigned int node_id_type;
@@ -25,8 +23,9 @@ typedef unsigned int node_id_type;
 enum ProblemType {
     INFEASIBLE,
     OPTIMAL,
-    UNBOUNDED,
-    MAX_ITER_REACHED
+    MAX_ITER_REACHED,
+    UNBOUNDED
+
 };
 
 

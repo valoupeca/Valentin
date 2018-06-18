@@ -68,7 +68,7 @@
 
 #include "armadillo"
 
-
+#include "emd.h"
 
 using namespace std;
 
@@ -377,6 +377,78 @@ void calcul_chemin(Graph_t graph_t, std::vector<int> sources, std::set<int> dest
 
 }
 
+
+void calcul_emd(Graph_t &graph_t, vector<int> &subsetOfLandmarks, set<int> &setOfLandmarksNeighbors, set<int> &setofChangedAS,
+                set<int> &setOfChangedNeighbors, mat &matrix, mat &curvMat, int indexTab)
+{
+
+        int dist;
+        int i;
+        mat costMat;
+        int results;
+        int I=0,J=0;
+        std::pair<AdjacencyIterator, AdjacencyIterator> neighbors;
+        for(auto l : subsetOfLandmarks) {
+            i=0;
+            I=0;
+            uvec indexOfLandmarkNeighbors(degree(vertex(l,graph_t), graph_t)+1);
+            vec sourceDist(degree(vertex(l,graph_t), graph_t)+1);
+            sourceDist(i)=0.5;
+            indexOfLandmarkNeighbors(i++) = distance(setOfLandmarksNeighbors.begin(), setOfLandmarksNeighbors.find(l));
+            neighbors= boost::adjacent_vertices(vertex(l,graph_t), graph_t);
+            for(; neighbors.first != neighbors.second; ++neighbors.first) {
+                sourceDist(i)=0.5/(sourceDist.n_rows-1);
+                indexOfLandmarkNeighbors(i++) =  distance(setOfLandmarksNeighbors.begin(), setOfLandmarksNeighbors.find(*neighbors.first));
+            }
+            for (auto k : setofChangedAS) {
+                i=0;
+                uvec indexOfChangedASNeighbors(degree(vertex(k,graph_t), graph_t)+1);
+                rowvec destDist(degree(vertex(k,graph_t), graph_t)+1);
+                destDist(i)=0.5;
+                indexOfChangedASNeighbors(i++) = distance(setOfChangedNeighbors.begin(), setOfChangedNeighbors.find(k));
+                neighbors= boost::adjacent_vertices(vertex(k,graph_t), graph_t);
+                for(; neighbors.first != neighbors.second; ++neighbors.first) {
+                    destDist(i)=0.5/(destDist.n_cols-1);
+                    indexOfChangedASNeighbors(i++) =  distance(setOfChangedNeighbors.begin(), setOfChangedNeighbors.find(*neighbors.first));
+                }
+                costMat=matrix(indexOfChangedASNeighbors,indexOfLandmarkNeighbors);
+
+                int n1 = (matrix.n_rows);
+                int n2 = (matrix.n_cols);
+                double* cost = 0;
+                // double* G;
+
+                double* alpha;
+                double* beta;
+
+
+
+                vector<double> a1 (subsetOfLandmarks.begin(), subsetOfLandmarks.end());
+
+                vector<double> b1 (setOfLandmarksNeighbors.begin(), setOfLandmarksNeighbors.end());
+
+                double*  a = a1.data();
+                double*  b = b1.data();
+
+
+                int maxIter = 150;
+
+
+
+                results =  EMD_wrap(n1,n2,destDist.memptr(), sourceDist.memptr() ,matrix.memptr() , curvMat.memptr() , alpha, beta, cost, maxIter);
+
+                curvMat(I,J+indexTab)=1-results/costMat(0,0);
+//            cout<<"Opt. Cost from "<<I<< " to "<<J<<" is "<<curvMat(I,J)<<endl;
+                I++;
+            }
+            J++;
+        }
+
+
+
+
+}
+
 int main(int argc, char** argv)
 
 {
@@ -384,7 +456,7 @@ int main(int argc, char** argv)
     cout << "Armadillo version: " << arma_version::as_string() << endl;
 
 
-    string file = "//home/lamure/Documents/developpement/test.graphml";
+    string file = "/home/lamure/Documents/developpement/test.graphml";
 
     Graph_t1 graph_t1;
 
@@ -564,20 +636,36 @@ int main(int argc, char** argv)
         threads[c]->join();
         delete threads[c];
     }
-    for (int i=0; i<20; i++){
 
-        for (int j=0; j<20; j++){
 
-            cout << dsp(i,j)<<" ";
+    // Now let's calculate the curvature matrix with optimal transport
 
+    mat curvMat=mat(setofChangedAS.size(),setOfLandmarks.size());
+
+    cout<<"fin de calcul de la matrice des distances"<<endl;
+
+
+    cout << " calcul EMD " << endl;
+
+    for (auto l :setOfLandmarks){
+        landmarks.push_back(l);
+      /*  if (count % numOfElementsPerThread ==0 ){
+            threads[threadNum] = new thread(calcul_ot, std::ref(graph_t),  landmarks , setOfLandmarksNeighbors,
+                                            setofChangedAS, setOfChangedNeighbors, std::ref(matrix), std::ref(curvMat),
+                                            threadNum*numOfElementsPerThread);
+            cout<<"Thread Num:"<<threadNum<<endl;
+            threadNum ++;
+            landmarks.clear();
         }
-
-        cout <<endl;
-
+        count ++;*/
     }
 
+    calcul_emd(std::ref(graph_t),  landmarks , setOfLandmarksNeighbors,
+               setofChangedAS, setOfChangedNeighbors, std::ref(dsp), std::ref(curvMat),
+               threadNum*numOfElementsPerThread);
 
-    cout << "sum(sum(mzt)) : " << sum(sum(dsp)) << endl;
-    std::cout << std::endl;
+    cout << "fin du calcul" << endl;
+
+
 
 }
