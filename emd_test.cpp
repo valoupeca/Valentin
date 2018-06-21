@@ -20,6 +20,7 @@
 
 
 using namespace lemon;
+using namespace std;
 
 // all types should be signed
 typedef int64_t arc_id_type; // {short, int, int64_t} ; Should be able to handle (n1*n2+n1+n2) with n1 and n2 the number of nodes (INT_MAX = 46340^2, I64_MAX = 3037000500^2)
@@ -37,9 +38,10 @@ cost_type sqrdistance2d(T* a, T* b) {
 }
 
 int EMD_wrap(int n1, int n2, double *X, double *Y, double *D, double *G,
-             double* alpha, double* beta, double *cost, int maxIter)  {
+             double* alpha, double* beta, int maxIter)  {
 // beware M and C anre strored in row major C style!!!
     int n, m, i, cur;
+    int cost =0;
 
     typedef FullBipartiteDigraph Digraph;
     DIGRAPH_TYPEDEFS(FullBipartiteDigraph);
@@ -108,21 +110,25 @@ int EMD_wrap(int n1, int n2, double *X, double *Y, double *D, double *G,
     // Solve the problem with the network simplex algorithm
 
     int ret=net.run();
-    if (ret==(int)net.OPTIMAL) {
-        *cost = 0;
+
+    double resultdist = net.totalCost();  // resultdist is the EMD
+
+   /* if (ret==(int)net.OPTIMAL ) {
+        cost = 0;
         Arc a; di.first(a);
         for (; a != INVALID; di.next(a)) {
             int i = di.source(a);
             int j = di.target(a);
             double flow = net.flow(a);
-            *cost += flow * (*(D+indI[i]*n2+indJ[j-n]));
+            cout << " i 1 : " << indI[i] << " ind J " << n2+indJ[j-n] << " D " << D << endl;
+            cout << "multiplication  : " << D+indI[i]*n2+indJ[j-n] <<endl;
+            cost = cost + flow * (*(D+indI[i]*n2+indJ[j-n]));
             *(G+indI[i]*n2+indJ[j-n]) = flow;
-            *(alpha + indI[i]) = -net.potential(i);
-            *(beta + indJ[j-n]) = net.potential(j);
+
         }
 
-    }
+    }*/
 
 
-    return ret;
+    return resultdist;
 }
