@@ -37,7 +37,7 @@ cost_type sqrdistance2d(T* a, T* b) {
     return (a[0] - b[0])*(a[0] - b[0]) + (a[1] - b[1])*(a[1] - b[1]);
 }
 
-int EMD_wrap(int n1, int n2, double *X, double *Y, double *D, double *G,
+double EMD_wrap(int n1, int n2, double *X, double *Y, double *D, double *G,
              double* alpha, double* beta, int maxIter)  {
 // beware M and C anre strored in row major C style!!!
     int n, m, i, cur;

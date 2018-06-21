@@ -386,7 +386,7 @@ void calcul_emd(Graph_t &graph_t, vector<int> &subsetOfLandmarks, set<int> &setO
     int dist;
     int i;
     mat costMat;
-    int results;
+    double results;
     int I=0,J=0;
 
 
@@ -445,8 +445,8 @@ void calcul_emd(Graph_t &graph_t, vector<int> &subsetOfLandmarks, set<int> &setO
             results =  EMD_wrap(n1,n2, destDist.memptr(), sourceDist.memptr() ,costMat.memptr() , curvMat.memptr() , alpha, beta, maxIter);
 
          //   cout << " cost emd : " << results << endl;
-            curvMat(I,J+indexTab)=results;
-
+            curvMat(I,J+indexTab)=1-results/costMat[0,0];
+            cout<<I<<","<<J<<","<<curvMat(I,J+indexTab)<<endl;
 //          cout<<"Opt. Cost from "<<I<< " to "<<J<<" is "<<curvMat(I,J)<<endl;
             I++;
         }
@@ -477,6 +477,7 @@ int main(int argc, char** argv)
     Graph_t graph_t;
 
     copy_graph(graph_t1, graph_t);
+    graph_t1.clear();
 
     int N = num_vertices(graph_t);
 
@@ -530,6 +531,7 @@ int main(int argc, char** argv)
 
     int numOfThreads = thread::hardware_concurrency();
     cout<< "Num of possible thread :"<<numOfThreads<<endl;
+    numOfThreads = 7;
 
     std::map<std::string, int> asMap;
 
@@ -654,8 +656,8 @@ int main(int argc, char** argv)
     cout << " calcul EMD " << endl;
 
     landmarks.clear();
-    threadNum = 0;
-    numOfElementsPerThread = setOfLandmarks.size()/numOfThreads+1;
+    numOfThreads=1;
+    numOfElementsPerThread = setOfLandmarks.size()/numOfThreads;
     count = 1;
     threadNum =0;
    for (auto l :setOfLandmarks){
