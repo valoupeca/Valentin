@@ -69,7 +69,7 @@
 #include "armadillo"
 
 #include "emd.h"
-
+#include "ot.h"
 
 using namespace std;
 
@@ -378,6 +378,47 @@ void calcul_chemin(Graph_t graph_t, std::vector<int> sources, std::set<int> dest
 
 }
 
+void calcul_ot(Graph_t &graph_t, vector<int> &subsetOfLandmarks, set<int> &setOfLandmarksNeighbors, set<int> &setofChangedAS,
+               set<int> &setOfChangedNeighbors, mat &matrix, mat &curvMat, int indexTab){
+    int dist;
+    int i;
+    mat costMat;
+    OTResult results;
+    int I=0,J=0;
+    std::pair<AdjacencyIterator, AdjacencyIterator> neighbors;
+    for(auto l : subsetOfLandmarks) {
+        i=0;
+        I=0;
+        uvec indexOfLandmarkNeighbors(degree(vertex(l,graph_t), graph_t)+1);
+        vec sourceDist(degree(vertex(l,graph_t), graph_t)+1);
+        sourceDist(i)=0.5;
+        indexOfLandmarkNeighbors(i++) = distance(setOfLandmarksNeighbors.begin(), setOfLandmarksNeighbors.find(l));
+        neighbors= boost::adjacent_vertices(vertex(l,graph_t), graph_t);
+        for(; neighbors.first != neighbors.second; ++neighbors.first) {
+            sourceDist(i)=0.5/(sourceDist.n_rows-1);
+            indexOfLandmarkNeighbors(i++) =  distance(setOfLandmarksNeighbors.begin(), setOfLandmarksNeighbors.find(*neighbors.first));
+        }
+        for (auto k : setofChangedAS) {
+            i=0;
+            uvec indexOfChangedASNeighbors(degree(vertex(k,graph_t), graph_t)+1);
+            rowvec destDist(degree(vertex(k,graph_t), graph_t)+1);
+            destDist(i)=0.5;
+            indexOfChangedASNeighbors(i++) = distance(setOfChangedNeighbors.begin(), setOfChangedNeighbors.find(k));
+            neighbors= boost::adjacent_vertices(vertex(k,graph_t), graph_t);
+            for(; neighbors.first != neighbors.second; ++neighbors.first) {
+                destDist(i)=0.5/(destDist.n_cols-1);
+                indexOfChangedASNeighbors(i++) =  distance(setOfChangedNeighbors.begin(), setOfChangedNeighbors.find(*neighbors.first));
+            }
+            costMat=matrix(indexOfChangedASNeighbors,indexOfLandmarkNeighbors);
+            results = sinkhorn_knopp(destDist, sourceDist, costMat, 8e-2, 1.9 , 1e-6, 1e4);
+            curvMat(I,J+indexTab)=1-results.optCost/costMat(0,0);
+//            cout<<"Opt. Cost from "<<I<< " to "<<J<<" is "<<curvMat(I,J)<<endl;
+            I++;
+        }
+        J++;
+    }
+}
+
 
 void calcul_emd(Graph_t &graph_t, vector<int> &subsetOfLandmarks, set<int> &setOfLandmarksNeighbors, set<int> &setofChangedAS,
                 set<int> &setOfChangedNeighbors, mat &matrix, mat &curvMat, int indexTab)
@@ -646,6 +687,33 @@ int main(int argc, char** argv)
     }
 
 
+    // Now let's calculate the curvature matrix
+    mat curvMat1=mat(setofChangedAS.size(),setOfLandmarks.size());
+    cout<<"fin de calcul de la matrice des distances"<<endl;
+    landmarks.clear();
+    threadNum = 0;
+    numOfElementsPerThread = setOfLandmarks.size()/numOfThreads+1;
+    count = 1;
+    threadNum =0;
+    for (auto l :setOfLandmarks){
+        landmarks.push_back(l);
+        if (count % numOfElementsPerThread ==0 ){
+            threads[threadNum] = new thread(calcul_ot, std::ref(graph_t),  landmarks , setOfLandmarksNeighbors,
+                                            setofChangedAS, setOfChangedNeighbors, std::ref(dsp), std::ref(curvMat1),
+                                            threadNum*numOfElementsPerThread);
+            cout<<"Thread Num:"<<threadNum<<endl;
+            threadNum ++;
+            landmarks.clear();
+        }
+        count ++;
+    }
+    for(int c = 0; c < threadNum; c++)
+    {
+        threads[c]->join();
+        delete threads[c];
+    }
+
+
     // Now let's calculate the curvature matrix with optimal transport
 
     mat curvMat=mat(setofChangedAS.size(),setOfLandmarks.size());
@@ -691,4 +759,8 @@ int main(int argc, char** argv)
 
 
     curvMat.print(std::cout);
+
+    /* difference des matrices */
+
+
 }
