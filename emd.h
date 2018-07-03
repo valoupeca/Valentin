@@ -14,8 +14,6 @@
 #include <iostream>
 #include <vector>
 
-#include "network_simplex_simple.h"
-
 using namespace lemon;
 
 typedef unsigned int node_id_type;

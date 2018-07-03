@@ -68,8 +68,9 @@
 
 #include "armadillo"
 
-#include "emd.h"
 #include "ot.h"
+#include "emd.h"
+#include "Dynamic_apporach.h"
 
 using namespace std;
 
@@ -81,6 +82,7 @@ using namespace boost;
 
 // vertex = correspond aux noeuds
 
+/*
 struct vertex_info {
 
     std::string name;
@@ -113,7 +115,9 @@ struct vertex_info {
 
 };
 
-/*  edges -> correspond aux arcs*/
+*/
+/*  edges -> correspond aux arcs*//*
+
 
 struct edge_info {
 
@@ -127,7 +131,9 @@ struct edge_info {
 
 };
 
-/*def graph*/
+*/
+/*def graph*//*
+
 
 typedef adjacency_list <boost::listS, boost::vecS, boost::undirectedS,vertex_info,
 
@@ -137,7 +143,9 @@ typedef adjacency_list <boost::listS, boost::vecS, boost::directedS,vertex_info,
 
         edge_info >  Graph_t1;
 
-/* Declare dynamic properties for graphml format. */
+*/
+/* Declare dynamic properties for graphml format. *//*
+
 
 boost::dynamic_properties dp;
 
@@ -155,15 +163,21 @@ typedef property_map < Graph_t, vertex_index_t >::type IndexMap;
 
 typedef boost::iterator_property_map < double*, IndexMap, double, double& > DistanceMap;
 
-/*property map*/
+*/
+/*property map*//*
 
-/*in & out edges*/
+
+*/
+/*in & out edges*//*
+
 
 typedef graph_traits<Graph_t>::in_edge_iterator inEdge;
 
 typedef graph_traits<Graph_t>::out_edge_iterator outEdge;
 
-/*class visitor pour djisktra*/
+*/
+/*class visitor pour djisktra*//*
+
 class My_visitor : boost::default_bfs_visitor{
 protected:
     std::set<int> dests;
@@ -184,10 +198,13 @@ public:
     }
 };
 
-/*  Declare function prototype */
+*/
+/*  Declare function prototype *//*
+
 
 void readGraphMLFile(Graph_t& graphToBuild, string gmlFileToRead);
 
+*/
 /*
 
  * ===  FUNCTION  ======================================================================
@@ -198,7 +215,8 @@ void readGraphMLFile(Graph_t& graphToBuild, string gmlFileToRead);
 
  * =====================================================================================
 
- */
+ *//*
+
 
 void readGraphMLFile ( Graph_t1& designG, string fileName )
 
@@ -254,8 +272,11 @@ void readGraphMLFile ( Graph_t1& designG, string fileName )
 
     gmlStream.close();
 
-}               /* -----  end of method ExpressionGraph::readGraphMLFile  ----- */
+}               */
+/* -----  end of method ExpressionGraph::readGraphMLFile  ----- *//*
 
+
+*/
 /*
 
  * ===  FUNCTION  ======================================================================
@@ -266,7 +287,8 @@ void readGraphMLFile ( Graph_t1& designG, string fileName )
 
  * =====================================================================================
 
- */
+ *//*
+
 
 void calcul_chemin(Graph_t graph_t, std::vector<int> sources, std::set<int> dests, mat &mat, int indexTab  ) {
 
@@ -320,7 +342,8 @@ void calcul_chemin(Graph_t graph_t, std::vector<int> sources, std::set<int> dest
 
 
 
-        /*     typedef std::vector<Graph_t::edge_descriptor> PathType;
+        */
+/*     typedef std::vector<Graph_t::edge_descriptor> PathType;
 
              PathType path;
 
@@ -372,7 +395,8 @@ void calcul_chemin(Graph_t graph_t, std::vector<int> sources, std::set<int> dest
 
              std::cout << "Distance: " << distanceMap[landmark] << std::endl;
 
-          */
+          *//*
+
 
     }
 
@@ -495,12 +519,13 @@ void calcul_emd(Graph_t &graph_t, vector<int> &subsetOfLandmarks, set<int> &setO
     }
 
 }
+*/
 
 int main(int argc, char** argv)
 
 {
 
-    cout << "Armadillo version: " << arma_version::as_string() << endl;
+  /*cout << "Armadillo version: " << arma_version::as_string() << endl;
 
 
     string file = "/home/lamure/Documents/developpement/test.graphml";
@@ -522,7 +547,7 @@ int main(int argc, char** argv)
 
     int N = num_vertices(graph_t);
 
-    /* v2 , prendre noeud arrivée et de départ, chercher les plus court voisins et développé la matrice OT*/
+    *//* v2 , prendre noeud arrivée et de départ, chercher les plus court voisins et développé la matrice OT*//*
 
     vector<std::string> landmark(20);
 
@@ -748,19 +773,73 @@ int main(int argc, char** argv)
         delete threads[c];
     }
 
-   /* vector<int> setoflands(setOfLandmarks.begin(),setOfLandmarks.end());
+   *//* vector<int> setoflands(setOfLandmarks.begin(),setOfLandmarks.end());
     int result = 0;
     calcul_emd((graph_t),  setoflands , setOfLandmarksNeighbors,
             setofChangedAS, setOfChangedNeighbors, (dsp), (curvMat),
-            150);*/
+            150);*//*
 
     cout << "fin du calcul  = "  << endl;
 
 
 
-    curvMat.print(std::cout);
 
-    /* difference des matrices */
 
+    mat difference=mat(setofChangedAS.size(),setOfLandmarks.size());
+
+    difference = curvMat - curvMat1;
+
+    difference.print(std::cout);
+
+    *//* difference des matrices *//*
+*/
+
+
+    vector<std::string> landmark(20);
+
+
+
+
+    landmark[0] ="24482";
+
+    landmark[1] ="131284";
+
+    landmark[2] ="1455";
+
+    landmark[3] ="531";
+
+    landmark[4] ="1501";
+
+    landmark[5] ="52519";
+
+    landmark[6] ="263276";
+
+    landmark[7] ="22773";
+
+    landmark[8] ="12400";
+
+    landmark[9] ="42926";
+
+    landmark[10] ="266084";
+
+    landmark[11] ="11663";
+
+    landmark[12] ="393223";
+
+    landmark[13] ="9549";
+
+    landmark[14] ="35816";
+
+    landmark[15] ="52376";
+
+    landmark[16] ="266117";
+
+    landmark[17] ="56660";
+
+    landmark[18]="52752";
+
+
+    mat difference;
+    difference = Dynamic_calcul(landmark);
 
 }
