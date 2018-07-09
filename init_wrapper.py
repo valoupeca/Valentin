@@ -16,16 +16,19 @@ import warnings
 
 
 cdef extern from "Dynamic_approach.h":
+ mat Dynamic_calcul(vector<std::string> landmark)
 
 
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
-def emd_c(np.ndarray[double, ndim=1, mode="c"] a, np.ndarray[double, ndim=1, mode="c"]  b, np.ndarray[double, ndim=2, mode="c"]  M, int max_iter):
+def Dynamic_calcul(np.array[string, ndim = 1, mode="c"]):
+
+cdef np.array[string, ndim = 1, mode="c"]) landmark = np.zeros(20);
 
 
 
 # calling the function
-cdef int result_code = EMD_wrap(n1, n2, <double*> a.data, <double*> b.data, <double*> M.data, <double*> G.data, <double*> alpha.data, <double*> beta.data, <double*> &cost, max_iter)
+cdef mat result_code = Dynamic_calcul(landmark)
 
-return G, cost, alpha, beta, result_code
+return result_code
