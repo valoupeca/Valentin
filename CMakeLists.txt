@@ -20,7 +20,7 @@ endif()
 
 SET(CMAKE_C_COMPILER g++)
 SET(CMAKE_CXX_COMPILER g++)
-set(SOURCE_FILES main.txt main2.txt mainv2.cpp emd_test.cpp emd.h EMD_nb.cpp bregman.cpp Dynamic_approach.cpp Dynamic_apporach.h)
+set(SOURCE_FILES main.txt main2.txt mainv2.cpp emd_test.cpp emd.h EMD_nb.cpp bregman.cpp Dynamic_approach.cpp Dynamic_apporach.h wrapper.i)
 add_executable(Valentin ${SOURCE_FILES})
 link_directories(/usr/lib64/)
 
